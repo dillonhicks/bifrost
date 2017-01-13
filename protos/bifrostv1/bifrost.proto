@@ -1,0 +1,62 @@
+        syntax = "proto3";
+
+option cc_enable_arenas = true;
+option py_generic_services = true;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+package bifrostv1;
+
+
+message Endpoint {
+    uint64 id               = 1;
+    string name             = 2;
+    string service_name     = 3;
+    string url              = 4;
+    string forward_to       = 5;
+    string owner            = 6;
+    repeated string tags    = 7;
+}
+
+
+message CreateEndpointRequest {
+    string name                 = 1;
+    string service_name         = 2;
+    string url                  = 3;
+    string forward_to           = 4;
+    string owner                = 5;
+    repeated string tags        = 6;
+}
+
+
+message CreateEndpointResponse {
+    Endpoint endpoint           = 1;
+}
+
+
+message ListEndpointsResponse {
+    repeated Endpoint endpoints = 1;
+}
+
+
+
+service Bifrost {
+
+    rpc CreateEndpoint(CreateEndpointRequest) returns (CreateEndpointResponse) {
+        option (google.api.http) = {
+            post: "/v1/endpoint"
+            body: "*"
+        };
+    }
+
+
+    rpc ListEndpoints(google.protobuf.Empty) returns (stream Endpoint) {
+        option (google.api.http) = {
+            get: "/v1/endpoint"
+        };
+    }
+
+
+
+}

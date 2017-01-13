@@ -1,7 +1,9 @@
-grpc
 grpcio
 gevent
 thundersnow
 futures
 protobuf>=3.1.0
 googleapis-common-protos>=1.5.0
+sqlalchemy
+requests
+jinja2

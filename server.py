@@ -1,47 +1,38 @@
-"""Python Stub implementation of echoexample"""
+"""Python Stub implementation of bifrostv1"""
 import sys
-from concurrent import futures
-import pkg_resources
 import time
-from subprocess import Popen, PIPE
-import logging
+from concurrent import futures
+from subprocess import Popen
 
 import grpc
+import pkg_resources
+from sqlalchemy import create_engine
 from thundersnow.dateutil import Delta
-from google.protobuf.json_format import MessageToDict
+from thundersnow.type import immutable
 
-from echoexample import echo_pb2, echo_pb2_grpc
-from echoexample.echo_pb2 import (
-    HelloRequest,
-    HelloResponse,
-)
-
-
-LOG = logging.getLogger(__name__)
+from bifrost.api import BifrostAPI
+from bifrost.model import SQLAlchemyBaseModel
+from bifrost.service import BifrostServiceFactory
+from bifrostv1 import bifrost_pb2_grpc
 
 
-class Echo(echo_pb2_grpc.EchoServicer):
+def serve(config, port, with_proxy_server=False):
 
-    def Hello(self, request, context):
-        # type: (HelloRequest, grpc.RpcContext) -> HelloResponse
-        LOG.info('Request[%s]: %s', context.peer(), MessageToDict(request))
-        LOG.info('Request[%s]: %s', context.peer(), context.invocation_metadata())
-        response =  HelloResponse()
-        response.message = '{}, {}!'.format(request.greeting, request.name)
-        return response
-
-
-def serve(port, with_proxy_server=False):
+    engine = create_engine(config.DATABASE_URI, echo=True)
+    SQLAlchemyBaseModel.metadata.create_all(engine, checkfirst=True)
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    echo_pb2_grpc.add_EchoServicer_to_server(Echo(), server)
+    bifrost_service = BifrostServiceFactory.create(config)
+    bifrost_api = BifrostAPI(service=bifrost_service)
+
+    bifrost_pb2_grpc.add_BifrostServicer_to_server(bifrost_api, server)
 
     server.add_insecure_port('[::]:{}'.format(port))
     server.start()
 
     proxy_process = None
-    proxy_filepath = pkg_resources.resource_filename('echoexample', 'bin/rest-proxy-server.bin')
+    proxy_filepath = pkg_resources.resource_filename('bifrostv1', 'bin/rest-proxy-server.bin')
     if sys.platform.lower() == 'darwin':
         proxy_filepath = '.'.join([proxy_filepath, 'darwin'])
 
@@ -57,11 +48,18 @@ def serve(port, with_proxy_server=False):
         server.stop(0)
 
 
+def load_config():
+    return immutable(
+        'Config',
+        DATABASE_URI='postgres+psycopg2://APIServerUser:DieInBattleAndGoToValhalla@127.0.0.1/bifrostapi'
+    )
+
+
 def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Run echoexample, optionally with the REST Proxy Server',
+        description='Run bifrostv1, optionally with the REST Proxy Server',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('-p', '--port', type=str, action='store',
@@ -72,8 +70,7 @@ def main():
                         default=False, help='Start the rest proxy server')
 
     args = parser.parse_args()
-    logging.basicConfig(level=logging.INFO)
-    serve(args.port, args.with_proxy_server)
+    serve(load_config(), args.port, args.with_proxy_server)
 
 
 if __name__ == '__main__':

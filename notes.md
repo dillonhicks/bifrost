@@ -1,0 +1,2 @@
+- edit /etc/networking-manager/dnsmask.d/local
+  - add: address=/.<subdomain>.<domain>.<tldn>/127.0.0.1/

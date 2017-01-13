@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: DieInBattleAndGoToValhalla
+      POSTGRES_USER: APIServerUser
+      POSTGRES_DB: bifrostapi
+
+    restart: always
+    ports:
+      - "5432:5432"
+

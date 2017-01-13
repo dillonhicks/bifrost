@@ -1,6 +1,6 @@
-name: echoexample
+name: bifrostv1
 version: 1.0.0
 author: Dillon Hicks
 author_email: dillon@dillonhicks.io
-project_url: https://github.com/dillonhicks/gotham-helloworld
+project_url: https://github.com/dillonhicks/tbd
 default_port: 8080

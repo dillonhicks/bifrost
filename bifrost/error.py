@@ -1,0 +1,2 @@
+class BifrostError(Exception):
+    pass
