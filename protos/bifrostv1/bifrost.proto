@@ -1,4 +1,4 @@
-        syntax = "proto3";
+syntax = "proto3";
 
 option cc_enable_arenas = true;
 option py_generic_services = true;
@@ -30,6 +30,12 @@ message CreateEndpointRequest {
 }
 
 
+message Proxy {
+    string uuid = 1;
+    string user = 2;
+}
+
+
 message CreateEndpointResponse {
     Endpoint endpoint           = 1;
 }
@@ -39,9 +45,40 @@ message ListEndpointsResponse {
     repeated Endpoint endpoints = 1;
 }
 
+message StartProxyRequest {
+    string user = 1;
+}
 
+message StartProxyResponse {
+    string uuid = 1;
+}
+
+message StopProxyRequest {
+    string uuid = 1;
+}
+
+message StopProxyResponse {
+}
+
+
+message StreamProxyClientBinaryRequest{
+    string uuid = 1;
+}
+
+message ProxyClientBinaryPart {
+    bytes chunk = 1;
+}
+
+message ClientConfigRequest {
+    string uuid = 1;
+}
+
+message ClientConfigResponse {
+    string config = 1;
+}
 
 service Bifrost {
+
 
     rpc CreateEndpoint(CreateEndpointRequest) returns (CreateEndpointResponse) {
         option (google.api.http) = {
@@ -50,13 +87,47 @@ service Bifrost {
         };
     }
 
-
-    rpc ListEndpoints(google.protobuf.Empty) returns (stream Endpoint) {
+    rpc ListEndpoints(google.protobuf.Empty) returns (ListEndpointsResponse) {
         option (google.api.http) = {
             get: "/v1/endpoint"
         };
     }
 
+    rpc StreamEndpoints(google.protobuf.Empty) returns (stream Endpoint) {
+        option (google.api.http) = {
+            get: "/v1/streaming/proxy"
+        };
+    }
 
+    rpc StartProxy(StartProxyRequest) returns (StartProxyResponse) {
+        option (google.api.http) = {
+            post: "/v1/proxy"
+            body: "*"
+        };
+    }
 
+    rpc StopProxy(StopProxyRequest) returns (StopProxyResponse) {
+        option (google.api.http) = {
+            post: "/v1/proxy"
+            body: "*"
+        };
+    }
+
+    rpc StreamProxies(google.protobuf.Empty) returns (stream Proxy) {
+        option (google.api.http) = {
+            get: "/v1/proxy"
+        };
+    }
+
+    rpc StreamProxyClientBinary(StreamProxyClientBinaryRequest) returns (stream ProxyClientBinaryPart) {
+        option (google.api.http) = {
+            get: "/v1/streaming/proxyclient"
+        };
+    }
+
+    rpc ClientConfig(ClientConfigRequest) returns (ClientConfigResponse) {
+        option (google.api.http) = {
+            get: "/v1/proxy/config"
+        };
+    }
 }

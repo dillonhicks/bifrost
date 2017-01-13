@@ -51,7 +51,9 @@ def serve(config, port, with_proxy_server=False):
 def load_config():
     return immutable(
         'Config',
-        DATABASE_URI='postgres+psycopg2://APIServerUser:DieInBattleAndGoToValhalla@127.0.0.1/bifrostapi'
+        DATABASE_URI='postgres+psycopg2://APIServerUser:DieInBattleAndGoToValhalla@127.0.0.1/bifrostapi',
+        docker=immutable('DOCKER_CONFIG',
+                         IMAGE_NAME='sequenceiq/ngrokd',)
     )
 
 

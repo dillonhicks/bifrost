@@ -62,7 +62,7 @@ class Storage(object):
         # type: (SessionFactory, google.protobuf.message.Message) -> None
         self.session_factory = session_factory
 
-    def put(self, key: str, message: google.protobuf.message.Message,
+    def put(self, message: google.protobuf.message.Message,
             existing_session: Session=None) -> KeyValue:
 
         envelope = any_pb2.Any()
